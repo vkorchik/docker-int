@@ -1,4 +1,3 @@
-import akka.http.scaladsl.model.HttpRequest
 import akka.http.scaladsl.testkit.ScalatestRouteTest
 import com.whisk.docker.impl.spotify.DockerKitSpotify
 import com.whisk.docker.scalatest.DockerTestKit
@@ -16,22 +15,17 @@ class Test extends Matchers
 
   override implicit def patienceConfig: PatienceConfig = PatienceConfig(20 seconds, 100 millis)
 
-  "asd" should {
-    "asd " in {
+  "Root container" should {
+    "be online" in {
       isContainerReady(rootContainer).futureValue shouldBe true
       rootContainer.getPorts().futureValue.get(8182) should not be empty
       rootContainer.getIpAddresses().futureValue should not be Seq.empty
 
+      RootClient.doRequest("/status").futureValue shouldBe "ok"
+    }
 
-      RootClient.doRequest(HttpRequest(
-        uri = "http://0.0.0.0:8182/status"
-      )).flatMap(_.entity.toStrict(10 seconds).map(_.data.decodeString("UTF-8")))
-        .futureValue shouldBe "ok"
-
-      RootClient.doRequest(HttpRequest(
-        uri = "http://0.0.0.0:8182/id"
-      )).flatMap(_.entity.toStrict(10 seconds).map(_.data.decodeString("UTF-8")))
-        .futureValue.toLong should (be > 0L and be < 1000L)
+    "response with random id" in {
+      RootClient.doRequest("/id").futureValue.toLong should (be > 0L and be < 1000L)
     }
   }
 
