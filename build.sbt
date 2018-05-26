@@ -41,6 +41,7 @@ lazy val root = (project in file("."))
       case _ => true
     }
   )
+  .aggregate(int)
 
 lazy val int = (project in file("int"))
   .settings(commonSettings)
